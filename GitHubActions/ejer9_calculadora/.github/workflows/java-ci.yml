@@ -1,0 +1,50 @@
+name: Compilar, testear y crear JAR de Calculadora
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Descargar el repositorio
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # Configurar Java 21
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # Compilar el código fuente a la carpeta out/
+      - name: Compilar código fuente
+        run: |
+          mkdir -p out
+          javac -d out src/*.java
+
+      # Ejecutar los tests (CalculadoraTest)
+      - name: Ejecutar tests
+        run: java -cp out CalculadoraTest
+
+      # Crear el archivo JAR (solo si los tests pasan)
+      - name: Crear archivo JAR ejecutable
+        run: |
+          mkdir -p dist
+          echo "Main-Class: Main" > manifest.txt
+          jar cfm dist/Calculadora.jar manifest.txt -C out .
+          echo "✅ JAR creado correctamente en dist/Calculadora.jar"
+
+      # Ejecutar el JAR
+      - name: Ejecutar el JAR
+        run: java -jar dist/Calculadora.jar
+
+      # Subir el artefacto a GitHub (para descargarlo desde la acción)
+      - name: Subir artefacto generado
+        uses: actions/upload-artifact@v4
+        with:
+          name: Calculadora-JAR
+          path: dist/Calculadora.jar
