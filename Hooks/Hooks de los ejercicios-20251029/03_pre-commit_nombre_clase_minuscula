@@ -1,0 +1,47 @@
+#!/bin/sh
+# Hook pre-commit para verificar nombres de clases Java
+# Requisitos: bash/sh, grep, sed, cut, javac (opcional)
+
+echo "Verificando nombres de clases Java..."
+
+# Archivos modificados y añadidos al commit (solo .java)
+CHANGES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$')
+
+BAD_NAMES=0
+
+#  Analizar cada archivo Java modificado
+for file in $CHANGES; do
+  # Verificar que el archivo existe (no borrado)
+  if [ ! -f "$file" ]; then
+    continue
+  fi
+
+  # Buscar nombres de clase dentro del archivo
+  CLASS_NAMES=$(grep -E 'class\s+[A-Za-z0-9_]+' "$file" | sed -E 's/.*class\s+([A-Za-z0-9_]+).*/\1/')
+ 
+  #  Comprobar si empiezan con mayúscula
+  for name in $CLASS_NAMES; do
+    FIRST_CHAR=$(echo "$name" | cut -c1)
+    if ! echo "$FIRST_CHAR" | grep -q '[A-Z]'; then
+      echo "La clase '$name' en '$file' no empieza con mayúscula."
+      BAD_NAMES=1
+    fi
+  done
+done
+
+# Cancelar el commit si hay errores
+if [ $BAD_NAMES -ne 0 ]; then
+  echo "Corrige los nombres de clase antes de hacer commit."
+  exit 1
+fi
+
+echo "Todos los nombres de clase Java son válidos."
+exit 0
+
+# ===== EXPLICACIÓN ========
+#git diff --cached --name-only --diff-filter=ACM	Lista los archivos que se van a commitear (Añadidos, Copiados o Modificados).
+#grep '\.java$'	Filtra solo los .java.
+#grep -E 'class\s+[A-Za-z0-9_]+'	Busca las líneas donde se definen clases.
+#sed -E 's/.*class\s+([A-Za-z0-9_]+).*/\1/'	Extrae el nombre de la clase.
+#cut -c1 + grep -q '[A-Z]'	Comprueba que empiece con mayúscula.
+#exit 1	Bloquea el commit si hay errores.

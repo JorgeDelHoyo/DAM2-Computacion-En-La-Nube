@@ -1,0 +1,23 @@
+#!/bin/sh
+# Hook pre-commit para proyectos Java
+
+
+
+
+# Directorio donde está el código fuente
+SRC_DIR="src"
+BIN_DIR="bin"
+
+
+mkdir -p $BIN_DIR
+
+
+javac -d $BIN_DIR $(find $SRC_DIR -name "*.java")
+
+
+if [ $? -ne 0 ]; then
+  echo "XXXX"
+  exit 1
+fi
+
+echo "XXXX"

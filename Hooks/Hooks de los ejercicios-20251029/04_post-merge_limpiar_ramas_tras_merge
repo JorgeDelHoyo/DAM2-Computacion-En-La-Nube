@@ -1,0 +1,37 @@
+#!/bin/bash
+#Hook que limpia las ramas locales tras merge
+
+# para interaación desde la consola
+exec < /dev/tty
+echo "lanzando.."
+# Recuperamos el nombre d ela rama actual
+branch_name=$(git branch | grep "*" | sed "s/\* //")
+
+# Recuperamos el nombre de la rama recien fusionada
+reflog_message=$(git reflog -1)
+merged=$(echo $reflog_message | cut -d" " -f 4 | sed "s/://")
+main_branch=$(git config --get init.defaultBranch)
+
+# Si la rama recien fusionada es la principal, salimos
+if [[ $merged = $main_branch ]]; then
+	echo "Estas en la rama principal, no se eliminarán ramas"
+	exit 0
+fi
+
+# Mostramos mensaje
+echo " "
+echo "Fusionada \"$merged\" en \"$branch_name\". "
+
+# Preguntamos la acción
+read -p "¿Quieres borrar la rama \"$merged\"? (y/N) " answer
+
+if [[ "$answer" == "y" ]]; then
+	echo "Borrando la rama local"
+	git branch -d $merged
+
+	echo "Borrando la rama remota"
+	git push origin --delete $merged
+	exit 1
+else
+	echo "No s eha podido borrar la rama"
+fi

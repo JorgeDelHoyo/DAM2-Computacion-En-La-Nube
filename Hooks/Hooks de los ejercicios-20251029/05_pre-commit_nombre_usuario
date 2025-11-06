@@ -1,0 +1,37 @@
+#!/bin/bash
+# ----------------------------------------------------------
+# Hook pre-commit
+# Comprueba que el nombre de usuario de Git esté configurado
+# ----------------------------------------------------------
+
+# Obtenemos el nombre del usuario configurado
+USER_NAME=$(git config user.name)
+
+#Esta línea habrá que descomentarla para que pregunte por el nombr ede usuairo
+#exec < /dev/tty
+
+
+
+echo " Verificando configuración del usuario Git..."
+
+# Si el nombre está vacío, pedimos al usuario que lo configure
+if [ -z "$USER_NAME" ]; then
+  echo " No hay ningún nombre de usuario configurado en Git."
+  echo " Debes configurarlo antes de hacer commit."
+  echo
+  read -p "Introduce tu nombre (por ejemplo, Juan Pérez): " NEW_NAME
+
+  # Si el usuario no escribe nada, abortamos el commit
+  if [ -z "$NEW_NAME" ]; then
+    echo " No se puede hacer commit sin un nombre de usuario."
+    exit 1
+  fi
+
+  # Guardamos la configuración local del usuario
+  git config user.name "$NEW_NAME"
+  echo " Nombre configurado correctamente: $(git config user.name)"
+else
+  echo " Nombre de usuario detectado: $USER_NAME"
+fi
+
+exit 0

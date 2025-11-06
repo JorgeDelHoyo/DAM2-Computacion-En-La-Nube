@@ -1,0 +1,33 @@
+#!/bin/sh
+# Hook pre-commit: se ejecuta antes de hacer git commit
+
+# Realiza un hook que, si no está configurado el nombre de usuario, lo pida 
+# y lo configure antes de hacer un commit
+# (para probarlo, elimina la configuración de tu nombre de usuario en git
+#: git config  - -global --unset user.name).
+
+# para interacción con la consola
+exec < /dev/tty
+echo "Lanzando hook de comprobación de nombre de usuario..."
+
+# Obtener valor user.name
+nombre=$(git config --global user.name)
+
+# Comprobar valor vacio
+if [ -z "$nombre" ]; then 
+    echo "No tienes configurado tu nombre de usuario en Git."
+    read -p "Introduce tu nombre de usuario: " nuevo_nombre
+
+	# Comprobar que el usuario introduzca algo
+    if [ -z "$nuevo_nombre" ]; then
+        echo "Error: no se puede continuar sin un nombre de usuario."
+        exit 1
+	fi
+
+	git config --global user.name "$nuevo_nombre"
+    echo "Nombre de usuario configurado como: $nuevo_nombre"
+else
+    echo "Nombre de usuario actual: $nombre"
+fi
+echo "Todo correcto. Se realizará el commit."
+exit 0

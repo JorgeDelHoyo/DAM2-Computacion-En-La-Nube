@@ -1,0 +1,20 @@
+#!/bin/sh
+# Hook pre-commit: se ejecuta antes de hacer git commit
+
+echo "Ejecutando hook commit-msg..."
+
+
+# Evitar mensajes de commit genéricos.
+# Lee el mensaje actual del commit (Git lo pasa como parámetro).
+COMMIT_MSG=$(cat "$1")
+echo "$COMMIT_MSG"
+# if [ "$COMMIT_MSG" != "Update" ] && [ "$COMMIT_MSG" != "Fix" ]; then  -- Solo funciona si se escribe Update o Fix, pero no si hay otras palabras
+# if [ "$COMMIT_MSG" != "^Update" ] && [ "$COMMIT_MSG" != "^Fix" ]; then  -- Con solo un corchete, no admite expresiones regulares
+# if [[ "$COMMIT_MSG" != "^Update" ]] && [[ "$COMMIT_MSG" != "^Fix" ]]; then   -- Resulta que != no funcipona en bash para expersione sregulares, hay que usar ==
+# Resulta que tampoco funciona ^ y que no hay que poner "" para la regex
+if [[ ! "$COMMIT_MSG" == Update* ]] && [[ ! "$COMMIT_MSG" == Fix* ]]; then 
+    echo "XXXX"
+    exit 1
+fi
+
+echo "Todo correcto. Se realizará el commit."

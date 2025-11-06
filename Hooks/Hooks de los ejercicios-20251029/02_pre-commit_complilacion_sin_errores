@@ -1,0 +1,24 @@
+#!/bin/sh
+# Hook pre-commit para proyectos Java
+# Impide commits si el código no compila correctamente
+
+echo "Ejecutando verificación de compilación Java..."
+
+# Directorio donde está el código fuente
+SRC_DIR="src"
+BIN_DIR="bin"
+
+# Crear el directorio bin si no existe
+mkdir -p $BIN_DIR
+
+# Compilar los archivos Java
+javac -d $BIN_DIR $(find $SRC_DIR -name "*.java")
+
+#Si la compilación falla (código distinto de 0), abortar commit
+# $? devuelve el código del último comando
+if [ $? -ne 0 ]; then
+  echo "Error: el código Java no compila. Corrige los errores antes de hacer commit."
+  exit 1
+fi
+
+echo "Compilación correcta. Commit permitido."

@@ -1,0 +1,14 @@
+#!/bin/sh
+# Hook pre-commit: se ejecuta antes de hacer git commit
+
+echo "Ejecutando hook pre-commit..."
+
+
+# 
+COMMIT_MSG=$(git log -1 --pretty=%B)
+if [ "$COMMIT_MSG" = "Update" ] || [ "$COMMIT_MSG" = "Fix" ]; then
+    echo "XXX"
+    exit 1
+fi
+
+echo "Todo correcto. Se realizará el commit."

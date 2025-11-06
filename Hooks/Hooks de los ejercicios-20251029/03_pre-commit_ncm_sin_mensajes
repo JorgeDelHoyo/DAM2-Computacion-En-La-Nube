@@ -1,0 +1,40 @@
+#!/bin/sh
+# 
+# Requisitos: bash/sh, grep, sed, cut, javac (opcional)
+
+echo "XXXX"
+
+# Archivos modificados y añadidos al commit (solo .java)
+CHANGES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$')
+
+BAD_NAMES=0
+
+#  Analizar cada archivo Java modificado
+for file in $CHANGES; do
+  # Verificar que el archivo existe (no borrado)
+  if [ ! -f "$file" ]; then
+    continue
+  fi
+
+  # Buscar nombres de clase dentro del archivo
+  CLASS_NAMES=$(grep -E 'class\s+[A-Za-z0-9_]+' "$file" | sed -E 's/.*class\s+([A-Za-z0-9_]+).*/\1/')
+ 
+ 
+  for name in $CLASS_NAMES; do
+    FIRST_CHAR=$(echo "$name" | cut -c1)
+    if ! echo "$FIRST_CHAR" | grep -q '[A-Z]'; then
+      echo "XXXX"
+      BAD_NAMES=1
+    fi
+  done
+done
+
+# Cancelar el commit si hay errores
+if [ $BAD_NAMES -ne 0 ]; then
+  echo "XXXX"
+  exit 1
+fi
+
+echo "XXXX"
+exit 0
+
