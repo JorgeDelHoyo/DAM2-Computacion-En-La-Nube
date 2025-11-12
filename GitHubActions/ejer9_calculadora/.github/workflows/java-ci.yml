@@ -1,4 +1,14 @@
+# Descargar archivos -> checkout
+# Configurar java
+# Compilar .java -> outclass
+# Ejecutar Test
+# Ejecutar jar
+# Subir el artefacto generado a GitHub -> uses upload
+
 name: Compilar, testear y crear JAR de Calculadora
+
+# Se ejecuta siempre independientemente de la rama
+#on: [push, pull_request]
 
 on:
   push:
@@ -11,40 +21,38 @@ jobs:
     steps:
       # Descargar el repositorio
       - name: Checkout del código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Configurar Java 21
-      - name: Configurar Java
-        uses: actions/setup-java@v4
+      - name: Configurar Java 21
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
 
       # Compilar el código fuente a la carpeta out/
       - name: Compilar código fuente
-        run: |
-          mkdir -p out
-          javac -d out src/*.java
+        run: javac -d out src/*.java
 
       # Ejecutar los tests (CalculadoraTest)
       - name: Ejecutar tests
+        # -cp (ClassPath) out (carpeta contenedora de .class)
         run: java -cp out CalculadoraTest
 
       # Crear el archivo JAR (solo si los tests pasan)
       - name: Crear archivo JAR ejecutable
+        # cfe crea el file, nombre, metodo a emplear, extension
         run: |
-          mkdir -p dist
-          echo "Main-Class: Main" > manifest.txt
-          jar cfm dist/Calculadora.jar manifest.txt -C out .
-          echo "✅ JAR creado correctamente en dist/Calculadora.jar"
+          cd out
+          jar cfe Calculadora.jar Main *.class
 
       # Ejecutar el JAR
       - name: Ejecutar el JAR
-        run: java -jar dist/Calculadora.jar
+        run: java -jar out/Calculadora.jar
 
       # Subir el artefacto a GitHub (para descargarlo desde la acción)
       - name: Subir artefacto generado
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
-          name: Calculadora-JAR
-          path: dist/Calculadora.jar
+          name: calculadora-jar
+          path: out/Calculadora.jar
